@@ -58,6 +58,8 @@
 </template>
 
 <script>
+
+import {requestLogout} from '../api/api'
 export default {
   data() {
     return {
@@ -91,24 +93,31 @@ export default {
     },
     //退出登录
     logout: function () {
-      var _this = this;
+      let _this = this;
       this.$confirm('确认退出吗?', '提示', {
-        //type: 'warning'
       }).then(() => {
-        sessionStorage.removeItem('user');
-        _this.$router.push('/login/login');
+        requestLogout().then(data=>{
+          let {msg, code} = data;
+          if (code === 200) {
+            this.$message({
+              message: msg,
+              type: 'success'
+            });
+            sessionStorage.removeItem('user');
+            _this.$router.push('/login/login');
+          }
+        })
       }).catch(() => {
 
       });
     }
   },
   mounted() {
-    console.log(this.$router.options.routes)
-    var user = sessionStorage.getItem('user');
-    if (user) {
-      user = JSON.parse(user);
-      this.sysUserName = user.name || '';
-      this.sysUserAvatar = user.avatar || '';
+    console.log('*****',this.$route.matched)
+    let token = sessionStorage.getItem('user');
+    if (token) {
+      this.sysUserName = 'user';
+      this.sysUserAvatar = 'https://yu-yx.oss-cn-qingdao.aliyuncs.com/image/2020/7/17/24c1df26-a056-4b5e-8a98-22fd28a25938.jpeg';
     }
 
   }

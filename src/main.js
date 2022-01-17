@@ -7,9 +7,21 @@ import VueRouter from 'vue-router'
 import store from './vuex/store'
 import Vuex from 'vuex'
 import routes from './routes'
-import Mock from './mock'
-Mock.bootstrap();
 import 'font-awesome/css/font-awesome.min.css'
+
+import axios from 'axios'
+axios.defaults.baseURL = '/api'  //自动附加在所有axios请求前面，则可以省略/api，直接写'/xxxx/xxx'。否则需要设置'/api/xxxx/xxx'
+axios.interceptors.request.use(function (config) {
+  const token = sessionStorage.getItem('user')
+  if (token){
+    //添加请求头H_token
+    config.headers.common['H_token'] =  token
+  }
+  return config;
+}, function (error) {
+  return Promise.reject(error);
+});
+
 
 Vue.use(ElementUI)
 Vue.use(VueRouter)
@@ -25,7 +37,7 @@ router.beforeEach((to, from, next) => {
   if (to.path == '/login/login' || to.path == '/login/register') {
     sessionStorage.removeItem('user');
   }
-  let user = JSON.parse(sessionStorage.getItem('user'));
+  let user = sessionStorage.getItem('user');
   if (!user && to.path != '/login/login' && to.path != '/login/register') {
     next({ path: '/login/login' })
     if (to.path !='/'){
