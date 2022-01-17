@@ -1,0 +1,110 @@
+<template>
+  <el-form :model="ruleForm2" :rules="rules2" ref="ruleForm2" label-position="left" label-width="0px"
+           class="demo-ruleForm login-container">
+    <h3 class="title">图书漂流管理系统</h3>
+    <el-form-item prop="account">
+      <el-input type="text" v-model="ruleForm2.account" auto-complete="off" placeholder="账号"></el-input>
+    </el-form-item>
+    <el-form-item prop="checkPass">
+      <el-input type="password" v-model="ruleForm2.checkPass" auto-complete="off" placeholder="密码"></el-input>
+    </el-form-item>
+    <el-form-item prop="real_name">
+      <el-input type="text" v-model="ruleForm2.real_name" auto-complete="off" placeholder="真实姓名"></el-input>
+    </el-form-item>
+    <el-form-item prop="telephone">
+      <el-input type="text" v-model="ruleForm2.telephone" auto-complete="off" placeholder="电话号码"></el-input>
+    </el-form-item>
+    <el-form-item prop="email">
+      <el-input type="text" v-model="ruleForm2.email" auto-complete="off" placeholder="电子邮箱"></el-input>
+    </el-form-item>
+    <el-form-item style="width:100%;">
+      <el-button style="width: 45%" @click.native.prevent="gotoLogin">登录</el-button>
+      <el-button type="primary" style="width: 45%" @click.native.prevent="handleSubmit2" :loading="logining">注册</el-button>
+    </el-form-item>
+  </el-form>
+</template>
+
+<script>
+import {requestLogin} from '../../api/api';
+
+export default {
+  name:'register',
+  data() {
+    return {
+      logining: false,
+      ruleForm2: {
+        account: '',
+        checkPass: '',
+        real_name:'',
+        telephone:'',
+        email:''
+      },
+      rules2: {
+        account: [
+          {required: true, message: '请输入账号', trigger: 'blur'},
+          //{ validator: validaePass }
+        ],
+        checkPass: [
+          {required: true, message: '请输入密码', trigger: 'blur'},
+          //{ validator: validaePass2 }
+        ]
+      },
+    };
+  },
+  methods: {
+    gotoLogin() {
+      this.$router.push("/login/login")
+    },
+    handleSubmit2(ev) {
+      var _this = this;
+      this.$refs.ruleForm2.validate((valid) => {
+        if (valid) {
+          //_this.$router.replace('/table');
+          this.logining = true;
+          //NProgress.start();
+          var loginParams = {username: this.ruleForm2.account, password: this.ruleForm2.checkPass};
+          requestLogin(loginParams).then(data => {
+            this.logining = false;
+            //NProgress.done();
+            let {msg, code, user} = data;
+            if (code !== 200) {
+              this.$message({
+                message: msg,
+                type: 'error'
+              });
+            } else {
+              sessionStorage.setItem('user', JSON.stringify(user));
+              this.$router.push({path: '/table'});
+            }
+          });
+        } else {
+          console.log('error submit!!');
+          return false;
+        }
+      });
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.login-container {
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+  -moz-border-radius: 5px;
+  background-clip: padding-box;
+  margin: 100px auto;
+  width: 350px;
+  padding: 35px 35px 15px 35px;
+  background: #fff;
+  border: 1px solid #eaeaea;
+  box-shadow: 0 0 25px #cac6c6;
+
+  .title {
+    margin: 0px auto 40px auto;
+    text-align: center;
+    color: #505458;
+  }
+
+}
+</style>
