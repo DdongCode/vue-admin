@@ -1,5 +1,4 @@
 import axios from 'axios';
-import * as url from "url";
 
 //登录
 export const requestLogin = params => {
@@ -17,6 +16,11 @@ export const requestLogout = () => {
             method: 'post',
         }
     ).then(res => res.data);
+}
+
+//引入组件
+export const _import = (component)=>{
+    return import(`@/components${component}`)
 }
 
 

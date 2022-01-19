@@ -18,10 +18,9 @@
     <el-col :span="24" class="main">
       <aside :class="collapsed?'menu-collapsed':'menu-expanded'">
         <!--导航菜单-->
-        <el-menu :default-active="$route.path" class="el-menu-vertical-demo" @open="handleopen" @close="handleclose"
-                 @select="handleselect"
+        <el-menu :default-active="$route.path" class="el-menu-vertical-demo"
                  unique-opened router v-show="!collapsed">
-          <template v-for="(item,index) in $router.options.routes" v-if="!item.hidden">
+          <template v-for="(item,index) in AllRoutes" v-if="!item.hidden">
             <!--非叶子结点，有子菜单-->
             <el-submenu :index="index+''" v-if="!item.leaf">
               <template slot="title"><i :class="item.icon"></i>{{ item.name }}</template>
@@ -80,19 +79,8 @@ export default {
     }
   },
   methods: {
-    onSubmit() {
-      console.log('submit!');
-    },
-    handleopen() {
-      //console.log('handleopen');
-    },
-    handleclose() {
-      //console.log('handleclose');
-    },
-    handleselect: function (a, b) {
-    },
-    //退出登录
-    logout: function () {
+        //退出登录
+    logout(){
       let _this = this;
       this.$confirm('确认退出吗?', '提示', {
       }).then(() => {
@@ -103,7 +91,10 @@ export default {
               message: msg,
               type: 'success'
             });
+            //清除用户token
             sessionStorage.removeItem('user');
+            //清除动态路由
+            _this.$store.dispatch('clear_d_routes')
             _this.$router.push('/login/login');
           }
         })
@@ -113,13 +104,16 @@ export default {
     }
   },
   mounted() {
-    console.log('*****',this.$route.matched)
     let token = sessionStorage.getItem('user');
     if (token) {
       this.sysUserName = 'user';
       this.sysUserAvatar = 'https://yu-yx.oss-cn-qingdao.aliyuncs.com/image/2020/7/17/24c1df26-a056-4b5e-8a98-22fd28a25938.jpeg';
     }
-
+  },
+  computed:{
+    AllRoutes(){
+      return [...this.$router.options.routes,...this.$store.getters.getDRoutes]
+    }
   }
 }
 

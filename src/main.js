@@ -6,20 +6,26 @@ import 'element-ui/lib/theme-default/index.css'
 import VueRouter from 'vue-router'
 import store from './vuex/store'
 import Vuex from 'vuex'
-import routes from './routes'
+import routes from './router/routes'
+import {createRouter} from "./router/routes";
 import 'font-awesome/css/font-awesome.min.css'
+import {getMenusRequest} from './api/permissionApi';
+
 
 import axios from 'axios'
-axios.defaults.baseURL = '/api'  //自动附加在所有axios请求前面，则可以省略/api，直接写'/xxxx/xxx'。否则需要设置'/api/xxxx/xxx'
+import Home from "./views/Home";
+import {_import} from "./api/api";
+
+axios.defaults.baseURL = '/api'  //自动附加在所有axios请求前面
 axios.interceptors.request.use(function (config) {
-  const token = sessionStorage.getItem('user')
-  if (token){
-    //添加请求头H_token
-    config.headers.common['H_token'] =  token
-  }
-  return config;
+    const token = sessionStorage.getItem('user')
+    if (token) {
+        //添加请求头H_token
+        config.headers.common['H_token'] = token
+    }
+    return config;
 }, function (error) {
-  return Promise.reject(error);
+    return Promise.reject(error);
 });
 
 
@@ -29,29 +35,85 @@ Vue.use(Vuex)
 
 
 const router = new VueRouter({
-  routes
+    routes
 })
 
+//路由前置拦截
 router.beforeEach((to, from, next) => {
-  //NProgress.start();
-  if (to.path == '/login/login' || to.path == '/login/register') {
-    sessionStorage.removeItem('user');
-  }
-  let user = sessionStorage.getItem('user');
-  if (!user && to.path != '/login/login' && to.path != '/login/register') {
-    next({ path: '/login/login' })
-    if (to.path !='/'){
-      alert("登录过期，请重新登录")
+    if (to.path === '/login/login' || to.path === '/login/register') {
+        sessionStorage.removeItem('user');
     }
-  } else {
-    next()
-  }
+    let user = sessionStorage.getItem('user');
+    //存在动态权限路由的时候添加路由
+    if (user) {
+        if (store.getters.getDRoutes.length > 0) {
+            router.matcher = createRouter(routes).matcher
+            router.addRoutes([...routes,...store.getters.getDRoutes])
+            routerGo(user, to, next)
+        } else {
+            getMenusRequest().then(data => {
+                let {msg, code, menus} = data;
+                if (code === 200) {
+                    let notFound = {
+                        path: '*',
+                        hidden: true,
+                        redirect: '/404'
+                    }
+                    let asyncRouter = filterAsyncRouter(menus);
+                    //404规则最后加入
+                    asyncRouter.push(notFound)
+                    //将正常的路由配置存储进vuex
+                    store.dispatch('store_d_routes', asyncRouter)
+                    router.matcher = createRouter(routes).matcher
+                    router.addRoutes([...routes,...store.getters.getDRoutes])
+                    routerGo(user, to, next)
+                }
+            })
+        }
+    } else {
+        routerGo(user, to, next)
+    }
+
 })
+
+function routerGo(user, to, next) {
+    if (!user && to.path !== '/login/login' && to.path !== '/login/register') {
+        next({path: '/login/login'})
+        if (to.path !== '/') {
+            alert("登录过期，请重新登录")
+        }
+    } else {
+        if (to.path === '/') {
+            next({path: '/main'})
+        }else {
+            if (to.matched.length === 0) {
+                next({path: to.path})
+            } else {
+                next()
+            }
+        }
+    }
+}
+
+function filterAsyncRouter(menus) {
+    return menus.filter(memu => {
+        if (memu.path === '/') {
+            memu.component = Home
+        } else {
+            let component = memu.component
+            memu.component = () => _import(component)
+        }
+        if (memu.children) {
+            memu.children = filterAsyncRouter(memu.children)
+        }
+        return true
+    })
+}
 
 
 new Vue({
-  router,
-  store,
-  render: h => h(App)
+    router,
+    store,
+    render: h => h(App)
 }).$mount('#app')
 

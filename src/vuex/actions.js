@@ -1,7 +1,8 @@
-//test
-export const increment = ({commit}) => {
-    commit('INCREMENT')
+export const store_d_routes = (context,Routes) => {
+    context.commit('STORE_D_ROUTES',Routes)
 }
-export const decrement = ({commit}) => {
-    commit('DECREMENT')
+
+export const clear_d_routes = ({commit}) => {
+    commit('CLEAR_D_ROUTES')
 }
+
