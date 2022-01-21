@@ -59,6 +59,7 @@
 <script>
 
 import {requestLogout} from '../api/api'
+import {UserInfoRequest} from '../api/user'
 export default {
   data() {
     return {
@@ -106,8 +107,19 @@ export default {
   mounted() {
     let token = sessionStorage.getItem('user');
     if (token) {
-      this.sysUserName = 'user';
       this.sysUserAvatar = 'https://yu-yx.oss-cn-qingdao.aliyuncs.com/image/2020/7/17/24c1df26-a056-4b5e-8a98-22fd28a25938.jpeg';
+      //获取用户信息
+      UserInfoRequest().then(data =>{
+        let {code,msg,userInfo} = data
+        if (code === 200){
+          this.sysUserName = userInfo.username
+        }else {
+          this.$message({
+            message:msg,
+            type: 'error'
+          })
+        }
+      })
     }
   },
   computed:{

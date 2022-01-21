@@ -12,12 +12,21 @@ export const requestLogin = params => {
 //注销
 export const requestLogout = () => {
     return axios.request({
-            url: 'logout',
+            url: '/logout',
             method: 'post',
         }
     ).then(res => res.data);
 }
 
+export const requestRegister = (params)=>{
+    return axios.request({
+        url: '/register',
+        method: 'post',
+        data:{
+            ...params
+        }
+    }).then(res => res.data);
+}
 //引入组件
 export const _import = (component)=>{
     return import(`@/components${component}`)

@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import App from './App'
 import ElementUI from 'element-ui'
-import 'element-ui/lib/theme-default/index.css'
+import 'element-ui/lib/theme-chalk/index.css'
 // import './assets/theme/theme-green/index.css'
 import VueRouter from 'vue-router'
 import store from './vuex/store'
@@ -15,6 +15,7 @@ import {getMenusRequest} from './api/permissionApi';
 import axios from 'axios'
 import Home from "./views/Home";
 import {_import} from "./api/api";
+import {UserPermissionRequest} from "./api/user";
 
 axios.defaults.baseURL = '/api'  //自动附加在所有axios请求前面
 axios.interceptors.request.use(function (config) {
@@ -48,7 +49,7 @@ router.beforeEach((to, from, next) => {
     if (user) {
         if (store.getters.getDRoutes.length > 0) {
             router.matcher = createRouter(routes).matcher
-            router.addRoutes([...routes,...store.getters.getDRoutes])
+            router.addRoutes([...routes, ...store.getters.getDRoutes])
             routerGo(user, to, next)
         } else {
             getMenusRequest().then(data => {
@@ -65,7 +66,19 @@ router.beforeEach((to, from, next) => {
                     //将正常的路由配置存储进vuex
                     store.dispatch('store_d_routes', asyncRouter)
                     router.matcher = createRouter(routes).matcher
-                    router.addRoutes([...routes,...store.getters.getDRoutes])
+                    router.addRoutes([...routes, ...store.getters.getDRoutes])
+                    //获取用户权限，存储至vuex
+                    UserPermissionRequest().then(data => {
+                        let {code, msg, result} = data
+                        if (code === 200) {
+                            store.dispatch('store_permissions', result)
+                        } else {
+                            this.$message({
+                                message: msg,
+                                type: 'error'
+                            })
+                        }
+                    })
                     routerGo(user, to, next)
                 }
             })
@@ -85,7 +98,7 @@ function routerGo(user, to, next) {
     } else {
         if (to.path === '/') {
             next({path: '/main'})
-        }else {
+        } else {
             if (to.matched.length === 0) {
                 next({path: to.path})
             } else {
@@ -110,6 +123,11 @@ function filterAsyncRouter(menus) {
     })
 }
 
+Vue.prototype.hasPermission = function (value) {
+    let permissions = store.getters.getPermissions
+    let index = permissions.indexOf(value)
+    return index !== -1
+}
 
 new Vue({
     router,
