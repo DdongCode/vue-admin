@@ -123,6 +123,7 @@ function filterAsyncRouter(menus) {
     })
 }
 
+//全局函数，验证是否拥有该权限
 Vue.prototype.hasPermission = function (value) {
     let permissions = store.getters.getPermissions
     let index = permissions.indexOf(value)

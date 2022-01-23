@@ -57,10 +57,10 @@
         <el-form-item prop="username" label="账号">
           <el-input type="text" v-model="ruleForm2.username" auto-complete="off" placeholder="账号"></el-input>
         </el-form-item>
-        <el-form-item prop="password" v-if="isAddUer" label="密码">
+        <el-form-item prop="password" v-if="isAddUser" label="密码">
           <el-input type="password" v-model="ruleForm2.password" auto-complete="off" placeholder="密码"></el-input>
         </el-form-item>
-        <el-form-item prop="confirmPwd" v-if="isAddUer" label="确认密码">
+        <el-form-item prop="confirmPwd" v-if="isAddUser" label="确认密码">
           <el-input type="password" v-model="ruleForm2.confirmPwd" auto-complete="off" placeholder="确认密码"></el-input>
         </el-form-item>
         <el-form-item prop="real_name" label="真实姓名">
@@ -72,7 +72,7 @@
         <el-form-item prop="email" label="电子邮箱">
           <el-input type="text" v-model="ruleForm2.email" auto-complete="off" placeholder="电子邮箱"></el-input>
         </el-form-item>
-        <el-form-item prop="status" label="是否有效" v-if="!isAddUer">
+        <el-form-item prop="status" label="是否有效" v-if="!isAddUser">
           <el-switch v-model="ruleForm2.status"></el-switch>
         </el-form-item>
       </el-form>
@@ -115,7 +115,7 @@ export default {
       users: [],
       dialogFormVisible: false,
       dialogRoleVisible: false,
-      isAddUer: true,
+      isAddUser: true,
       formTitle: '添加用户',
       ruleForm2: {
         username: '',
@@ -162,7 +162,7 @@ export default {
     //打开新增用户窗口
     toAddUser() {
       this.formTitle = '新增用户'
-      this.isAddUer = true
+      this.isAddUser = true
       this.dialogFormVisible = true
     },
     //取消新增/编辑用户
@@ -172,9 +172,8 @@ export default {
     },
     //打开编辑用户窗口
     editUser(user) {
-      console.log(user)
       this.formTitle = '编辑用户'
-      this.isAddUer = false
+      this.isAddUser = false
       this.ruleForm2 = user
       this.dialogFormVisible = true
     },
@@ -183,7 +182,7 @@ export default {
       this.$refs.ruleForm2.validate((valid) => {
         if (valid) {
           this.commitLoading = true
-          if (this.isAddUer) { //添加用户
+          if (this.isAddUser) { //添加用户
             UserAddRequest(this.ruleForm2).then(data => {
               this.commitLoading = false
               if (data.code === 200) {
