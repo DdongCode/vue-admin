@@ -41,7 +41,7 @@
               <el-button type="primary" size="mini" icon="el-icon-edit" circle @click="editUser(scope.row)"></el-button>
             </el-tooltip>
             <el-tooltip content="分配角色" placement="top" effect="light" v-if="hasPermission('user_assign_roles')">
-              <el-button type="success" size="mini" icon="el-icon-menu" circle
+              <el-button type="success" size="mini" icon="el-icon-thumb" circle
                          @click="AssigningRoles(scope.row.id)"></el-button>
             </el-tooltip>
             <el-tooltip content="删除" placement="top" effect="light" v-if="hasPermission('user_del')">

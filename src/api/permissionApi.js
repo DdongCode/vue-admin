@@ -18,3 +18,22 @@ export const PermissionGetRequest = (roleId)=>{
 export const PermissionTreeRequest = ()=>{
     return axios.get(`${BASE_URL}/getPermissionsTree`).then(res => res.data)
 }
+
+//添加/编辑权限
+export const PermissionAddOrEditRequest = (params)=>{
+    return axios.request({
+        url: `${BASE_URL}/addOrEdit`,
+        method: 'post',
+        data:{
+            ...params
+        }
+    }).then(res => res.data);
+}
+
+//删除权限
+export const PermissionDelRequest = (permissionId)=>{
+    return axios.delete(`${BASE_URL}/delete`,{
+        params:permissionId
+    }).then(res => res.data)
+}
+
